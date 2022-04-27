@@ -3,11 +3,11 @@ const area = '#main'
 const laser = '.laser'
 const explosao = '.explosao'
 const aliens = ['.alien1', '.alien2', '.alien3']
-let [alien1, alien2, alien3] = [false, false, false]
 let pontos = 0
+let recorde = 0
 let vidas = 3
 let game_over = false
-
+const background = document.getElementById('main')
 let jogo = {}
 let TECLAS = { w: 87, s: 83, a: 65, d: 68, n: 78, m: 77, }
 let aliensImg = [
@@ -19,54 +19,77 @@ $(document).keydown(function (e) { jogo.tecla[e.which] = true })
 $(document).keyup(function (e) { jogo.tecla[e.which] = false })
 
 // Loop do jogo
-
 function start() {
     $('#painel').hide()
     criarPlayer()
-    criaAlien()
+    pontos = 0
+    vidas = 3
+    $('.placar').remove()
+    placar()
     let tempo = window.setInterval(loop, 25)
     function loop() {
-        movePlayer(TECLAS.w, -15, 50)
-        movePlayer(TECLAS.s, 15, 490)
+        movePlayer(TECLAS.w, -10, 50)
+        movePlayer(TECLAS.s, 10, 490)
         criaLaser()
-        moveAlien()
         moveFundo()
-        explodir()
-        if( vidas <= 0 ) {
+        moveAlien()
+
+        checaColisao()
+        if (vidas <= 0) {
             gameOver()
-            window.clearInterval( tempo )
+            window.clearInterval(tempo)
             tempo = null
         }
     }
+    let tempo2 = window.setInterval(loop2, 500)
+    function loop2() {
+        criaAlien()
+
+        if (vidas <= 0) {
+            gameOver()
+            window.clearInterval(tempo2)
+            tempo2 = null
+        }
+    }
 }
+placar()
+
 function gameOver() {
-    $(player).hide()
-    $('.alien1').hide()
-    $('.alien2').hide()
-    $('.alien3').hide()
+    $(player).remove()
+    $('.alien1').remove()
+    $('.alien2').remove()
+    $('.alien3').remove()
     $('#painel').show()
-
+    placar()
 }
 
-// Funcao para movimentar player
+//------------------------------------------------------ Player
 function criarPlayer() {
-    $(area).append(`<img id="player" src="./assets/image/hero.png" alt="player"></img>`);  
+    $(area).append(`<img id="player" src="./assets/image/hero.png" alt="player"></img>`);
 }
 function movePlayer(tecla, deslocamento, limite) {
     if (jogo.tecla[tecla]) {
         let position = parseInt($(player).css("top"))
+        //let backTop = parseInt($(area).css("background-position-y"))
 
         if (deslocamento < 0 && position < limite) {
             $(player).css("top", limite - 50)
+
         } else if (deslocamento > 0 && position > limite) {
             $(player).css("top", limite + 50)
         } else {
             $(player).css("top", position + deslocamento)
+            let y = $(area).css("background-position-y")
+            //
+            //var banner = $('.main').css('background-position-y')
+            let x = $(area).css('background-position-x')
+            $(area).css("background-position-y", y - 2)
+            console.log( x, y );
         }
     }
 }
 
-// Funcao atirar
+//------------------------------------------------------ Atirar
 let podeAtirar = true
 function criaLaser() {
     let positionY = parseInt($(player).css("top"))
@@ -90,50 +113,55 @@ function moveLaser() {
     }
 }
 
-// Funcao para criar inimigos
+//------------------------------------------------------ Inimigo
+
 function inimigo(n, y) {
     $(area).append(`<img class='alien${n}
     cont' style="top: ${y}px" src="./assets/image/monster-${n}.png" alt="alien">`);
     $(`.alien${n}`).css("left", 920)
 }
-
 function criaAlien() {
-    let tempo = window.setInterval(criar, 800)
-    function criar() {
+    if (!game_over) {
         let y = Math.floor(Math.random() * (540 - 20) + 0)
         if (!game_over) {
-            if (alien1 == 0) {
+            if ($(aliens[0]).length < 1) {
                 inimigo(1, y)
-                alien1 = true
-            } else if (alien2 == 0) {
+            } else if ($(aliens[1]).length < 1) {
                 inimigo(2, y)
-                alien2 = true
-            } else if (alien3 == 0) {
+            } else if ($(aliens[2]).length < 1) {
                 inimigo(3, y)
-                alien3 = true
             }
-        }
-        if (game_over) {
-            window.clearInterval(tempo)
-            tempo = null
         }
     }
 }
-
-
 function moveAlien() {
     for (let alien in aliens) {
         let X = parseInt($(aliens[alien]).css("left"))
-        let vel = X > 600 ? 20 : 2.5
+        let vel = X > 600 ? 40 : 5
         $(aliens[alien]).css("left", X - (vel))
+        if (X < 10) {
+            $(aliens[alien]).remove()
+            $('.placar').remove()
+            placar()
+            vidas--
+        }
     }
 }
-
-function explodir() {
-    for (let alien in aliens) {
-        let X = parseInt($(aliens[alien]).css("left"))
-        criaExplosao(aliens[alien], alien, X)
-    }
+//------------------------------------------------------ Explosao, Colisao
+function criaExplosao(alien, n) {
+    let alienY = parseInt($(alien).css("top"))
+    let alienX = parseInt($(alien).css("left"))
+    $(area).append(`<div class='explosao${n}'></div>`);
+    $(`.explosao${n}`).css("top", alienY)
+    $(`.explosao${n}`).css("left", alienX + 35)
+    let explosaoX = parseInt($(`.explosao${n}`).css("left"))
+    $(`.explosao${n}`).css("left", explosaoX - 2.5)
+    $(laser).remove()
+    podeAtirar = true
+    $(alien).remove()
+    setTimeout((() => {
+        $(`.explosao${n}`).remove()
+    }), 800)
 }
 
 function colidiu(a, b) {
@@ -144,48 +172,31 @@ function colidiu(a, b) {
         return false
     }
 }
-
-function criaExplosao(alien, n, x) {
-    let explosaoX = parseInt($(`.explosao${n}`).css("left"))
-    $(`.explosao${n}`).css("left", explosaoX - 2.5)
-    if (colidiu(alien, laser) || x < 5) {
-        $(laser).remove()
-        alien1 = n == 0 ? 0 : 1
-        alien2 = n == 1 ? 0 : 1
-        alien3 = n == 2 ? 0 : 1
-        podeAtirar = true
-        pontos++
-        if(x < 5) {
+function checaColisao() {
+    for (let n in aliens) {
+        if (colidiu(aliens[n], laser)) {
+            $('.placar').remove()
+            pontos++
+            placar()
+            criaExplosao(aliens[n], n)
+        }
+        if (colidiu(aliens[n], player)) {
             $('.placar').remove()
             vidas--
             placar()
+            criaExplosao(aliens[n], n)
         }
-        if (colidiu(alien, laser)) {
-            pontos++
-        }
-        let alienY = parseInt($(alien).css("top"))
-        let alienX = parseInt($(alien).css("left"))
-        $(area).append(`<div class='explosao${n}'></div>`);
-        $(`.explosao${n}`).css("top", alienY)
-        $(`.explosao${n}`).css("left", alienX + 35)
-        $(alien).remove()
-        setTimeout((() => {
-            $(`.explosao${n}`).remove()
-        }), 800)
     }
 }
-
+//------------------------------------------------------ Fundo, Placar
 function moveFundo() {
-
-    let esquerda = parseInt($(area).css("background-position"))
-    $(area).css("background-position", esquerda - 1)
+    let x = parseInt($(area).css("background-position"))
+    $(area).css("background-position", x - 2)
 }
 
 function placar() {
     $(area).append(`<div class='placar'>
     <img class='vidas' src="./assets/image/${vidas}vidas.png" alt="vidas">
-    <h3 class='pontos'>score:  000</h3>
+    <h3 class='pontos'>score:  ${pontos * 100}</h3>
     </div>`);
-    $('.pontos').innerHtml = pontos
 }
-placar()

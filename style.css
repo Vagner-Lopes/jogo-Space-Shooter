@@ -19,6 +19,7 @@ body {
     margin: auto;
 }
 
+
 #player {
     position: relative;
     height: 50px;
@@ -37,39 +38,43 @@ body {
     background-size: cover;
 }
 
-.alien1, .alien2, .alien3  {
-    position: absolute; 
+.alien1,
+.alien2,
+.alien3 {
+    position: absolute;
     height: 55px;
     width: 83px;
     left: 542px;
     z-index: 995;
 }
+
 .placar {
-    position: absolute; 
+    position: absolute;
     display: flex;
     left: 10px;
     top: 10px;
 }
+
 .vidas {
     height: 50px;
     width: 130px;
-    
+
 }
+
 .pontos {
     margin: auto;
     margin-left: 20px;
     width: 250px;
     font-size: 35px;
     color: aliceblue;
-    background-color: rgb(132, 255, 214, 0.2);
+
 }
 
 #painel {
-    position: absolute; 
+    position: absolute;
     height: 400px;
     width: 450px;
-    left: 280px;
-    top: 100px;
+    margin: auto;
     background-image: url("./assets/image/painel.png");
     background-repeat: no-repeat;
     background-size: contain;
@@ -77,34 +82,39 @@ body {
 }
 
 h1 {
-    position: absolute; 
+    position: absolute;
     color: aliceblue;
     font-size: 25px;
     left: 150px;
     top: 10px;
 }
+
 h2 {
-    position: absolute; 
+    position: absolute;
     color: aliceblue;
     font-size: 20px;
     left: 152px;
     top: 90px;
 }
+
 p {
-    position: absolute; 
+    position: absolute;
     color: aliceblue;
     font-size: 15px;
     left: 106px;
     top: 140px;
 }
+
 strong {
-    color: red;
+    color: rgb(28, 177, 157);
+    font-size: 20px;
 }
+
 button {
     height: 45px;
     width: 45px;
     border-radius: 50%;
-    position: absolute; 
+    position: absolute;
     background-color: rgba(103, 238, 13, 0.3);
     font-size: 15px;
     cursor: pointer;
@@ -113,9 +123,9 @@ button {
     top: 311px;
 }
 
-
-
-.explosao1, .explosao2, .explosao0 {
+.explosao1,
+.explosao2,
+.explosao0 {
     width: 53px;
     height: 80px;
     position: absolute;
@@ -128,6 +138,11 @@ button {
 }
 
 @keyframes playExplosao {
-    from {background-position: 0px;}
-    to {background-position: -393px;}
+    from {
+        background-position: 0px;
+    }
+
+    to {
+        background-position: -393px;
+    }
 }
